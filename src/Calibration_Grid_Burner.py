@@ -4,15 +4,15 @@ import time, serial, numpy as np
 PORT = "COM3"
 BAUD = 115200
 
-x0, y0    = 0.0, 0.0
-xmax, ymax = 450.0, 440.0
-nx, ny    = 10, 9           # points per axis (includes endpoints)
+x0, y0    = 50, 55
+xmax, ymax = 400, 385
+nx, ny    = 8, 7            # points per axis (includes endpoints)
 
 travel_F  = 8000
-power_S   = 100              # 0..$30 (we set $30=1000 below)
-dwell_s   = 0.07              # seconds
+power_S   = 300      # 0..$30 (we set $30=1000 below)
+dwell_s   = .40      # seconds
 HOME_FIRST = True
-DRY_RUN = True              # True = just move, no burn (useful to test counts)
+DRY_RUN = False             # True = just move, no burn (useful to test counts)
 
 def send(ser, line):
     ser.write((line + "\r\n").encode())
@@ -43,23 +43,34 @@ def main():
 
     xs = np.linspace(x0,   xmax, nx)
     ys = np.linspace(y0,   ymax, ny)
-
-    idx = 0
-    for j, Y in enumerate(ys):
-        for i, X in enumerate(xs):
-            idx += 1
-            # move there with laser OFF
+    Y_prev = None
+    count = 0
+    
+    for j in range(len(ys)):
+        Y = float(ys[j])
+        
+        for i in range(len(xs)):
+            X = float(xs[i])
+            print(f"Moving to ({X:.3f},{Y:.3f})")
+            count += 1
             send(ser, f"G0 X{X:.3f} Y{Y:.3f} F{travel_F}")
+            time.sleep(1.5)
+            if (Y_prev != Y):
+                time.sleep(3.5)
+            print(f"moving to X{X:.3f} Y{Y:.3f}")
             if not DRY_RUN:
                 send(ser, f"M3 S{power_S}")
                 send(ser, f"G4 P{dwell_s:.3f}")
                 send(ser, "M5")
-            time.sleep(0.1)  # small delay to ensure command processing
+                print('firing')
+            
+            Y_prev = Y
+       
 
     send(ser, f"G0 X{x0:.3f} Y{y0:.3f}")
     send(ser, "M5")
     ser.close()
-    print(f"Done. Burned {idx} points ({nx} x {ny}).")
+    print(f"Done. Burned {count} points ({nx} x {ny}).")
 
 if __name__ == "__main__":
     main()
