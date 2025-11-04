@@ -4,13 +4,14 @@ import cv2
 CAMERA_ID = 1
 # mutable container so mouse callback can update it without `global`
 last_click = []
-WINDOW_NAME = "Camera - Click to place crosshair (q or ESC to quit)"
+# Make the instructions in the window explicit about LEFT-clicking in the image
+WINDOW_NAME = "Camera - LEFT-CLICK the image to place crosshair (q or ESC to quit)"
 def mouse_callback(event, x, y, flags, param):
-    # left mouse button click: update coordinate and print
+    # left mouse button click: update coordinate and print (explicit instruction)
     if event == cv2.EVENT_LBUTTONDOWN:
         last_click.clear()
         last_click.append((x, y))
-        print(f"Clicked at: ({x}, {y})")
+        print(f"Left-click at image pixel: ({x}, {y}) — crosshair placed")
 def draw_crosshair(img, center, size=20, thickness=1):
     x, y = center
     # horizontal

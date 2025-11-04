@@ -159,7 +159,7 @@ def input_loop():
             if len(parts) < 2:
                 print("Need at least X and Y. Format: X Y [Z]")
                 continue
-            x = float(parts[0])
+            x = float(parts[0]) 
             y = float(parts[1])
             coords = {"x": x, "y": y}
             if len(parts) >= 3:
